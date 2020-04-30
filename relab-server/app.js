@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = new express();
 const sql = require('mssql'); //Libreria per la connessione al dbms MSSQL
@@ -30,17 +29,11 @@ function makeSqlRequest(res) {
     //eseguo la query e aspetto il risultato nella callback
     sqlRequest.query(q, (err, result) => {sendQueryResults(err,result,res)}); 
 }
-
-
-
-
-
 function sendQueryResults(err,result, res)
 {
     if (err) console.log(err); // ... error checks
     res.send(coordConverter.generateGeoJson(result.recordset));  //Invio il risultato al Browser
 }
-
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });

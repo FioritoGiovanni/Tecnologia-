@@ -1,7 +1,6 @@
-
 const proj4 = require('proj4');
 const parse = require('wellknown');
-const Feature = require('./models/feature.model.js');
+const Feature = require('./models/feature.models.js');
 const FeatureCollection = require('./models/featureCollection.model.js');
 
 module.exports = class CoordConverter {
