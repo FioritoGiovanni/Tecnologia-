@@ -1,4 +1,7 @@
 
+//Il file SQLutils  è stato creato per ordinare tutte le funzioni e i metodi utili all'accesso al database
+//i metodi statici servono per non creare più di una volta un istanza e usare dirattamente gli oggetti del programma
+
 const sql = require('mssql');
 const CC = require('./CoordConverter.js');
 
@@ -12,7 +15,9 @@ const config = {
 }
 
 module.exports = class SqlUtils {
-
+/*il metodo connect riceve la funzione callback per avvisarci della riuscita della connessione visto che in javascript non possiamo usare un return
+oltre la funzione riceve anche i parametri req e res,vengono ricevuti perchè la funzione di callback richiede due paramentri e di conzeguenza anche il metodo
+principale connect deve ricevere due parametri anche se req non verrà mai utilizzato*/
     static connect(req,res, connectedCallback)
     {
         sql.connect(config, (err) => {
@@ -34,13 +39,14 @@ module.exports = class SqlUtils {
         res.send(coordConverter.generateGeoJson(result.recordset));  //Invio il risultato al Browser
     }
     
-
+/*Il metodo ciVettRequest ottiene le richieste dei fogli da cui otteniamo i dati e stampa il numero del foglio conservato nella variabile req 
+dopo aver ottenuto i dati visualizza il foglio*/
  static ciVettRequest(req,res) {
         let sqlRequest = new sql.Request();  //sqlRequest: oggetto che serve a eseguire le query
         let foglio = req.params.foglio; //ottengo il foglio passato come parametro dall'url
         let q = `SELECT INDIRIZZO, WGS84_X, WGS84_Y, CLASSE_ENE, EP_H_ND, CI_VETTORE, FOGLIO, SEZ
         FROM [Katmai].[dbo].[interventiMilano]
-        WHERE FOGLIO = ${foglio}`
+        WHERE FOGLIO = ${foglio}`//otteniamo i dati dall url passandoli alla condizione WHERE contenuta su questa riga di codice
         //eseguo la query e aspetto il risultato nella callback
         sqlRequest.query(q, (err, result) => {SqlUtils.sendCiVettResult(err,result,res)}); 
     }
