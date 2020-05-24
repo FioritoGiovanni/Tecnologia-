@@ -35,10 +35,10 @@ export class AppComponent implements OnInit {
   //Facciamo iniettare il modulo HttpClient dal framework Angular (ricordati di importare la libreria)
   }
 
-  //Metodo che scarica i dati nella variabile geoJsonObject
+  // Questo metodo ottiene i dati e li scarica dal server per metterli nella variabile geoJsonObject
   prepareData = (data: GeoFeatureCollection) => {
-    this.geoJsonObject = data
-    console.log( this.geoJsonObject );
+    this.geoJsonObject = data   //traserimento dei dati nella variabile
+    console.log( this.geoJsonObject );//mostriamo il dato ottenuto nella console
   }
 
   //Una volta che la pagina web è caricata, viene lanciato il metodo ngOnInit scarico i    dati
@@ -46,9 +46,19 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.obsGeoData = this.http.get<GeoFeatureCollection>("https://3000-c196f089-0985-4196-a119-21cde0085783.ws-eu01.gitpod.io/");
     this.obsGeoData.subscribe(this.prepareData);
-    this.obsCiVett = this.http.get<Ci_vettore[]>("https://3000-c196f089-0985-4196-a119-21cde0085783.ws-eu01.gitpod.io/ci_vettore/90");
-    this.obsCiVett.subscribe(this.prepareCiVettData);
+
   }
+
+  //Questo metodo richiama la route sul server che recupera il foglio specificato nella casella di testo
+  cambiaFoglio(foglio) : boolean
+  {
+    let val = foglio.value; //ottwniamo nella variabile val il valore del foglio
+    this.obsCiVett = this.http.get<Ci_vettore[]>(`https://3000-c196f089-0985-4196-a119-21cde0085783.ws-eu01.gitpod.io/ci_vettore/${val}`);  //otteniamo i dati del vettore da passare all'observable
+    this.obsCiVett.subscribe(this.prepareCiVettData); //all'interno di obsCiVett aggiungiamo prepareCiVettdata e il suo valore
+    console.log(val);
+    return false;
+  }
+
 
 
 
@@ -59,15 +69,28 @@ export class AppComponent implements OnInit {
       strokeWeight: 1
     });
   }
+    //metodo che riceve i vettori energetici e riempie un vettore di marker creando per ogni oggetto un marker
 
-   prepareCiVettData = (data: Ci_vettore[]) =>
+
+prepareCiVettData = (data: Ci_vettore[]) =>
   {
-    console.log(data); //Verifica di ricevere i vettori energetici
+    let latTot = 0; //Uso queste due variabili per calcolare latitudine e longitudine media
+    let lngTot = 0; //E centrare la mappa
+
+    console.log(data);
     this.markers = [];
-    for (const iterator of data) { //Per ogni oggetto del vettore creoa un Marker
+
+    for (const iterator of data) {
       let m = new Marker(iterator.WGS84_X,iterator.WGS84_Y,iterator.CI_VETTORE);
+      latTot += m.lat; //Sommo tutte le latitutidini e longitudini
+      lngTot += m.lng;
       this.markers.push(m);
     }
+    this.lng = lngTot/data.length; //Commenta qui
+    this.lat = latTot/data.length;
+    this.zoom = 16;
+  }
+
   }
 
 }
