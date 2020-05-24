@@ -1,4 +1,3 @@
-
 //Il file SQLutils  è stato creato per ordinare tutte le funzioni e i metodi utili all'accesso al database
 //i metodi statici servono per non creare più di una volta un istanza e usare dirattamente gli oggetti del programma
 
@@ -57,5 +56,22 @@ dopo aver ottenuto i dati visualizza il foglio*/
         if (err) console.log(err); // ... error checks
         res.send(result.recordset);  //Invio il risultato al Browser
   }
+
+  static ciVettGeoRequest(req,res) {
+        let sqlRequest = new sql.Request();  //sqlRequest: oggetto che serve a eseguire le query
+        let x = Number(req.params.lng);
+        let y = Number(req.params.lat);
+        let r = Number(req.params.r);
+        let q = `SELECT INDIRIZZO, WGS84_X, WGS84_Y, CLASSE_ENE, EP_H_ND, CI_VETTORE, FOGLIO, SEZ
+        FROM [Katmai].[dbo].[interventiMilano]
+        WHERE WGS84_X > ${x} - ${r} AND 
+        WGS84_X < ${x} + ${r} AND
+        WGS84_Y > ${y} - ${r} AND 
+        WGS84_Y < ${y} + ${r}`
+        
+        console.log(q);
+        //eseguo la query e aspetto il risultato nella callback
+        sqlRequest.query(q, (err, result) => {SqlUtils.sendCiVettReult(err,result,res)}); 
+    }
 
 }
