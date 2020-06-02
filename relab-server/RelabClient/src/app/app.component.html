@@ -11,6 +11,8 @@
   <agm-data-layer [geoJson]="geoJsonObject" [style]="styleFunc">
   </agm-data-layer>
   <!--Aggiungi un cerchio alla mappa-->
+  <!--nel tag agm-circle creiamo un cerchio nella mappa e abbiamo diversi parametri tra cui il raggio del cerchio,latitudine e longitudine del centro del cerchio colore e alcuni metodi
+  come il cambio delle dimensioni e l'evento doppio click sul cerchio-->
   <agm-circle [latitude]="circleLat" [longitude]="circleLng"
       [radius]="radius"
       [fillColor]="'red'"

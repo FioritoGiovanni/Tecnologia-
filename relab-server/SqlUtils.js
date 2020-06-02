@@ -27,7 +27,7 @@ principale connect deve ricevere due parametri anche se req non verrà mai utili
 
     static makeSqlRequest(req,res) {
         let sqlRequest = new sql.Request();  //sqlRequest: oggetto che serve a eseguire le query
-        let q = 'SELECT DISTINCT TOP (100) [GEOM].STAsText() FROM [Katmai].[dbo].[interventiMilano]';
+        let q = 'SELECT DISTINCT TOP (100) [WKT] FROM [Katmai].[dbo].[intMil4326WKT]';
         //eseguo la query e aspetto il risultato nella callback
         sqlRequest.query(q, (err, result) => {SqlUtils.sendQueryResults(err,result,res)}); 
     }
@@ -44,7 +44,7 @@ dopo aver ottenuto i dati visualizza il foglio*/
         let sqlRequest = new sql.Request();  //sqlRequest: oggetto che serve a eseguire le query
         let foglio = req.params.foglio; //ottengo il foglio passato come parametro dall'url
         let q = `SELECT INDIRIZZO, WGS84_X, WGS84_Y, CLASSE_ENE, EP_H_ND, CI_VETTORE, FOGLIO, SEZ
-        FROM [Katmai].[dbo].[interventiMilano]
+        FROM [Katmai].[dbo].[intMil4326WKT]
         WHERE FOGLIO = ${foglio}`//otteniamo i dati dall url passandoli alla condizione WHERE contenuta su questa riga di codice
         //eseguo la query e aspetto il risultato nella callback
         sqlRequest.query(q, (err, result) => {SqlUtils.sendCiVettResult(err,result,res)}); 
@@ -63,7 +63,7 @@ dopo aver ottenuto i dati visualizza il foglio*/
         let y = Number(req.params.lat);
         let r = Number(req.params.r);
         let q = `SELECT INDIRIZZO, WGS84_X, WGS84_Y, CLASSE_ENE, EP_H_ND, CI_VETTORE, FOGLIO, SEZ
-        FROM [Katmai].[dbo].[interventiMilano]
+        FROM [Katmai].[dbo].[intMil4326WKT]
         WHERE WGS84_X > ${x} - ${r} AND 
         WGS84_X < ${x} + ${r} AND
         WGS84_Y > ${y} - ${r} AND 
@@ -72,6 +72,29 @@ dopo aver ottenuto i dati visualizza il foglio*/
         console.log(q);
         //eseguo la query e aspetto il risultato nella callback
         sqlRequest.query(q, (err, result) => {SqlUtils.sendCiVettReult(err,result,res)}); 
+    }
+    
+    
+static geoGeomRequest(req, res) {
+        let sqlRequest = new sql.Request();  //sqlRequest: oggetto che serve a eseguire le query
+        let x = Number(req.params.lng);
+        let y = Number(req.params.lat);
+        let r = Number(req.params.r);
+        let q = `
+        SELECT SUM(EP_H_ND) as somma, AVG(EP_H_ND) as media, [WKT] , SEZ
+        FROM [Katmai].[dbo].[intMil4326WKT]
+        WHERE EP_H_ND > 0 AND SEZ in(
+            SELECT DISTINCT SEZ
+            FROM [Katmai].[dbo].[intMil4326WKT]
+            WHERE WGS84_X > ${x} - ${r} AND 
+                  WGS84_X < ${x} + ${r} AND
+                  WGS84_Y > ${y} - ${r} AND 
+                  WGS84_Y < ${y} + ${r})
+        GROUP BY [WKT], SEZ`
+
+        //console.log(q);
+        //eseguo la query e aspetto il risultato nella callback
+        sqlRequest.query(q, (err, result) => { SqlUtils.sendQueryResults(err, result, res) });
     }
 
 }
